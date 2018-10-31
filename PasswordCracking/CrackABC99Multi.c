@@ -52,8 +52,8 @@ void *kernel_function_1(){
   substr(salt, encrypted_passwords[0], 0, 6);
   for(int i=0;i<n_passwords;i<i++) {
     for(x='A'; x<='M'; x++){
-      for(y='A'; y<='M'; y++){
-        for(t = 'A'; t <= 'M'; t++){ // new for loop for the third initial
+      for(y='A'; y<='Z'; y++){
+        for(t = 'A'; t <= 'Z'; t++){ // new for loop for the third initial
           for(z=0; z<=99; z++){
             sprintf(plain, "%c%c%c%02d", x, y, t, z);
             enc = (char *) crypt(plain, salt);
@@ -91,8 +91,8 @@ void *kernel_function_2(){
   substr(salt, encrypted_passwords[0], 0, 6);
   for(int i=0;i<n_passwords;i<i++) {
     for(x='N'; x<='Z'; x++){
-      for(y='N'; y<='Z'; y++){
-        for(t = 'N'; t <= 'Z'; t++){ // new for loop for the third initial
+      for(y='A'; y<='Z'; y++){
+        for(t = 'A'; t <= 'Z'; t++){ // new for loop for the third initial
           for(z=0; z<=99; z++){
             sprintf(plain, "%c%c%c%02d", x, y, t, z);
             enc = (char *) crypt(plain, salt);
