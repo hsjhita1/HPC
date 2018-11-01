@@ -1,0 +1,1 @@
+Time elasped was 5214142221460ns or 5214.142221460s

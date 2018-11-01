@@ -34,7 +34,7 @@ void crack(char *salt_and_encrypted){
     for(y='A'; y<='Z'; y++){
       for(third_initial = 'A'; third_initial <= 'Z'; third_initial++){ // new for loop for the third initial
         for(z=0; z<=99; z++){
-          sprintf(plain, "%c%c%c%02d", x, y, t, z);
+          sprintf(plain, "%c%c%c%02d", x, y, third_initial, z);
           enc = (char *) crypt(plain, salt);
           count++;
           if(strcmp(salt_and_encrypted, enc) == 0){
