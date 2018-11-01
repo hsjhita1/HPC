@@ -16,16 +16,16 @@ char *encrypted_passwords[] = {
 };
 
 void multiCore(){//method to create multiple cores
-  pthread_t t1, t2;
+  pthread_t thread_1, thread_2;
 
   void *kernel_function_1();
   void *kernel_function_2();
 
-  pthread_create(&t1, NULL, kernel_function_1, NULL);
-  pthread_create(&t2, NULL, kernel_function_2, NULL);
+  pthread_create(&thread_1, NULL, kernel_function_1, NULL);
+  pthread_create(&thread_2, NULL, kernel_function_2, NULL);
 
-  pthread_join(t1, NULL);
-  pthread_join(t2, NULL);
+  pthread_join(thread_1, NULL);
+  pthread_join(thread_2, NULL);
 }
 
 void substr(char *dest, char *src, int start, int length){
@@ -47,15 +47,15 @@ void *kernel_function_1(){
     "$6$KB$UwKD1iCsvhAryQWAH6o8C9B6dEtOUOhYCgBfwtvffD.Ycz83.8GZ/9dhfIyVodUtHRyUl8A8LRfCNSlx8Lb2O1"
   };
 
-  int t; // new loop counter for the third initial
+  int third_initial; // new loop counter for the third initial
 
   substr(salt, encrypted_passwords[0], 0, 6);
   for(int i=0;i<n_passwords;i<i++) {
     for(x='A'; x<='M'; x++){
       for(y='A'; y<='Z'; y++){
-        for(t = 'A'; t <= 'Z'; t++){ // new for loop for the third initial
+        for(third_initial = 'A'; third_initial <= 'Z'; third_initial++){ // new for loop for the third initial
           for(z=0; z<=99; z++){
-            sprintf(plain, "%c%c%c%02d", x, y, t, z);
+            sprintf(plain, "%c%c%c%02d", x, y, third_initial, z);
             enc = (char *) crypt(plain, salt);
             count++;
             if(strcmp(encrypted_passwords[i], enc) == 0){
@@ -86,15 +86,15 @@ void *kernel_function_2(){
     "$6$KB$UwKD1iCsvhAryQWAH6o8C9B6dEtOUOhYCgBfwtvffD.Ycz83.8GZ/9dhfIyVodUtHRyUl8A8LRfCNSlx8Lb2O1"
   };
 
-  int t; // new loop counter for the third initial
+  int third_initial; // new loop counter for the third initial
 
   substr(salt, encrypted_passwords[0], 0, 6);
   for(int i=0;i<n_passwords;i<i++) {
     for(x='N'; x<='Z'; x++){
       for(y='A'; y<='Z'; y++){
-        for(t = 'A'; t <= 'Z'; t++){ // new for loop for the third initial
+        for(third_initial = 'A'; third_initial <= 'Z'; third_initial++){ // new for loop for the third initial
           for(z=0; z<=99; z++){
-            sprintf(plain, "%c%c%c%02d", x, y, t, z);
+            sprintf(plain, "%c%c%c%02d", x, y, third_initial, z);
             enc = (char *) crypt(plain, salt);
             count++;
             if(strcmp(encrypted_passwords[i], enc) == 0){

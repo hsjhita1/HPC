@@ -26,13 +26,13 @@ void crack(char *salt_and_encrypted){
   char *enc;
   int count = 0;
 
-  int t; // new loop counter for the third initial
+  int third_initial; // new loop counter for the third initial
 
   substr(salt, salt_and_encrypted, 0, 6);
 
   for(x='A'; x<='Z'; x++){
     for(y='A'; y<='Z'; y++){
-      for(t = 'A'; t <= 'Z'; t++){ // new for loop for the third initial
+      for(third_initial = 'A'; third_initial <= 'Z'; third_initial++){ // new for loop for the third initial
         for(z=0; z<=99; z++){
           sprintf(plain, "%c%c%c%02d", x, y, t, z);
           enc = (char *) crypt(plain, salt);
