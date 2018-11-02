@@ -5,32 +5,71 @@
 #include <GL/gl.h>
 #include <malloc.h>
 #include <signal.h>
+#include <pthread.h>
 
 /******************************************************************************
-  Displays two grey scale images. On the left is an image that has come from an 
-  image processing pipeline, just after colour thresholding. On the right is 
+  Displays two grey scale images. On the left is an image that has come from an
+  image processing pipeline, just after colour thresholding. On the right is
   the result of applying an edge detection convolution operator to the left
   image. This program performs that convolution.
-   
+
   Things to note:
     - A single unsigned char stores a pixel intensity value. 0 is black, 256 is
       white.
-    - The colour mode used is GL_LUMINANCE. This uses a single number to 
+    - The colour mode used is GL_LUMINANCE. This uses a single number to
       represent a pixel's intensity. In this case we want 256 shades of grey,
-      which is best stored in eight bits, so GL_UNSIGNED_BYTE is specified as 
+      which is best stored in eight bits, so GL_UNSIGNED_BYTE is specified as
       the pixel data type.
-    
-  To compile adapt the code below wo match your filenames:  
-    cc -o ip_coursework ip_coursework.c -lglut -lGL -lm 
-   
+
+  To compile adapt the code below wo match your filenames:
+    cc -o ip_coursework_041 ip_coursework_041.c -lglut -lGL -lm
+
   Dr Kevan Buckley, University of Wolverhampton, 2018
 ******************************************************************************/
-#define width 100 
+#define width 100
 #define height 72
+#define n_threads 2
+
+typedef struct arguments{
+  int start;
+  int stride;
+} arguments_t;
+
+void multiCore(){
+  pthread_t t1, t2, t3, t4;
+
+  arguments_t t1_arguments;
+  t1_arguments.start = 0;
+  t1_arguments.stride = 4;
+
+  arguments_t t2_arguments;
+  t2_arguments.start = 1;
+  t2_arguments.stride = 4;
+
+  arguments_t t3_arguments;
+  t3_arguments.start = 2;
+  t3_arguments.stride = 4;
+
+  arguments_t t4_arguments;
+  t4_arguments.start = 3;
+  t4_arguments.stride = 4;
+
+  void *detect_edges();
+
+  pthread_create(&t1, NULL, detect_edges, &t1_arguments);
+  pthread_create(&t2, NULL, detect_edges, &t2_arguments);
+  pthread_create(&t3, NULL, detect_edges, &t3_arguments);
+  pthread_create(&t4, NULL, detect_edges, &t4_arguments);
+
+  pthread_join(t1, NULL);
+  pthread_join(t2, NULL);
+  pthread_join(t3, NULL);
+  pthread_join(t4, NULL);
+}
 
 unsigned char image[], results[width * height];
 
-void detect_edges(unsigned char *in, unsigned char *out) {
+void *detect_edges(unsigned char *in, unsigned char *out) {
   int i;
   int n_pixels = width * height;
 
@@ -38,7 +77,7 @@ void detect_edges(unsigned char *in, unsigned char *out) {
     int x, y; // the pixel of interest
     int b, d, f, h; // the pixels adjacent to x,y used for the calculation
     int r; // the result of calculate
-    
+
     y = i / width;
     x = i - (width * y);
 
@@ -85,7 +124,7 @@ static void key_pressed(unsigned char key, int x, int y) {
     case 27: // escape
       tidy_and_exit();
       break;
-    default: 
+    default:
       printf("\nPress escape to exit\n");
       break;
   }
@@ -93,23 +132,24 @@ static void key_pressed(unsigned char key, int x, int y) {
 
 int main(int argc, char **argv) {
   signal(SIGINT, sigint_callback);
- 
+
   printf("image dimensions %dx%d\n", width, height);
-  detect_edges(image, results);
+  multiCore();
+  //detect_edges(image, results);
 
   glutInit(&argc, argv);
   glutInitWindowSize(width * 2,height);
   glutInitDisplayMode(GLUT_SINGLE | GLUT_LUMINANCE);
-      
+
   glutCreateWindow("6CS005 Image Progessing Courework");
   glutDisplayFunc(display);
   glutKeyboardFunc(key_pressed);
-  glClearColor(0.0, 1.0, 0.0, 1.0); 
+  glClearColor(0.0, 1.0, 0.0, 1.0);
 
-  glutMainLoop(); 
+  glutMainLoop();
 
   tidy_and_exit();
-  
+
   return 0;
 }
 
