@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include <signal.h>
 #include <pthread.h>
+#include <time.h>
 
 /******************************************************************************
   Displays two grey scale images. On the left is an image that has come from an
@@ -22,58 +23,30 @@
       the pixel data type.
 
   To compile adapt the code below wo match your filenames:
-    cc -o ip_coursework_041 ip_coursework_041.c -lglut -lGL -lm
+    cc -o ip_coursework_041_multi ip_coursework_041_multi.c -lglut -lGL -lm -pthread
 
   Dr Kevan Buckley, University of Wolverhampton, 2018
 ******************************************************************************/
 #define width 100
 #define height 72
-#define n_threads 2
-
-typedef struct arguments{
-  int start;
-  int stride;
-} arguments_t;
-
-void multiCore(){
-  pthread_t t1, t2, t3, t4;
-
-  arguments_t t1_arguments;
-  t1_arguments.start = 0;
-  t1_arguments.stride = 4;
-
-  arguments_t t2_arguments;
-  t2_arguments.start = 1;
-  t2_arguments.stride = 4;
-
-  arguments_t t3_arguments;
-  t3_arguments.start = 2;
-  t3_arguments.stride = 4;
-
-  arguments_t t4_arguments;
-  t4_arguments.start = 3;
-  t4_arguments.stride = 4;
-
-  void *detect_edges();
-
-  pthread_create(&t1, NULL, detect_edges, &t1_arguments);
-  pthread_create(&t2, NULL, detect_edges, &t2_arguments);
-  pthread_create(&t3, NULL, detect_edges, &t3_arguments);
-  pthread_create(&t4, NULL, detect_edges, &t4_arguments);
-
-  pthread_join(t1, NULL);
-  pthread_join(t2, NULL);
-  pthread_join(t3, NULL);
-  pthread_join(t4, NULL);
-}
+struct threadArgs{
+  unsigned char *in;
+  unsigned char *out;
+  int start, stride;
+};
 
 unsigned char image[], results[width * height];
 
-void *detect_edges(unsigned char *in, unsigned char *out) {
+void *detect_edges(void *args) {
   int i;
   int n_pixels = width * height;
+  struct threadArgs *myargs = args;
+  unsigned char *in = myargs->in;
+  unsigned char *out = myargs->out;
+  int stride = myargs->stride;
+  int start = myargs->start;
 
-  for(i=0;i<n_pixels;i++) {
+  for(i=start; i<n_pixels; i = i + stride) {
     int x, y; // the pixel of interest
     int b, d, f, h; // the pixels adjacent to x,y used for the calculation
     int r; // the result of calculate
@@ -130,12 +103,56 @@ static void key_pressed(unsigned char key, int x, int y) {
   }
 }
 
-int main(int argc, char **argv) {
-  signal(SIGINT, sigint_callback);
+int time_difference(struct timespec *start, struct timespec *finish, long long int *difference) {
+	long long int ds = finish->tv_sec - start->tv_sec;
+	long long int dn = finish->tv_nsec - start->tv_nsec;
+	if (dn < 0) {
+		ds--;
+		dn += 1000000000;
+	}
+	*difference = ds * 1000000000 + dn;
+	return !(*difference > 0);
+}
 
+
+int main(int argc, char **argv) {
+  struct timespec start, finish;
+  long long int time_elapsed;
+  clock_gettime(CLOCK_MONOTONIC, &start);
+
+
+  struct threadArgs arg1, arg2, arg3, arg4;
+  signal(SIGINT, sigint_callback);
+  pthread_t t1, t2, t3, t4;
   printf("image dimensions %dx%d\n", width, height);
-  multiCore();
+
+  arg1.in = image;
+  arg1.out = results;
+  arg2 = arg1;
+  arg3 = arg1;
+  arg4 = arg1;
+  arg1.start = 0;
+  arg1.stride = 4;
+  arg2.start = 1;
+  arg2.stride = 4;
+  arg3.start = 2;
+  arg3.stride = 4;
+  arg4.start = 3;
+  arg4.stride = 4;
+
+  pthread_create(&t1, NULL, detect_edges, &arg1);
+  pthread_create(&t2, NULL, detect_edges, &arg2);
+  pthread_create(&t3, NULL, detect_edges, &arg3);
+  pthread_create(&t4, NULL, detect_edges, &arg4);
   //detect_edges(image, results);
+  pthread_join(t1, NULL);
+  pthread_join(t2, NULL);
+  pthread_join(t3, NULL);
+  pthread_join(t4, NULL);
+
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  time_difference(&start, &finish, &time_elapsed);
+  printf("Time elasped was %lldns or %0.9lfs\n", time_elapsed, (time_elapsed/1.0e9));
 
   glutInit(&argc, argv);
   glutInitWindowSize(width * 2,height);
@@ -149,6 +166,8 @@ int main(int argc, char **argv) {
   glutMainLoop();
 
   tidy_and_exit();
+
+
 
   return 0;
 }
