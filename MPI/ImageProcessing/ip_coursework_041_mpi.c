@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include <signal.h>
 #include <time.h>
+#include <mpi.h>
 
 /******************************************************************************
   Displays two grey scale images. On the left is an image that has come from an
@@ -22,20 +23,22 @@
       the pixel data type.
 
   To compile adapt the code below wo match your filenames:
-    cc -o ip_coursework_041 ip_coursework_041.c -lglut -lGL -lm
+    mpicc ip_coursework_041_mpi.c -o ip_coursework_041_mpi -lglut -lGL -lm
 
   Dr Kevan Buckley, University of Wolverhampton, 2018
 ******************************************************************************/
 #define width 100
 #define height 72
 
-unsigned char image[], results[width * height];
+int size, rank;
+
+unsigned char image[], results[width * height], buffer[width * height];
 
 void detect_edges(unsigned char *in, unsigned char *out) {
   int i;
   int n_pixels = width * height;
 
-  for(i=0;i<n_pixels;i++) {
+  for(i=rank; i<n_pixels; i = i + size) {
     int x, y; // the pixel of interest
     int b, d, f, h; // the pixels adjacent to x,y used for the calculation
     int r; // the result of calculate
@@ -103,7 +106,14 @@ static void key_pressed(unsigned char key, int x, int y) {
   }
 }
 
+
 int main(int argc, char **argv) {
+  MPI_Status status;
+
+  MPI_Init(NULL, NULL);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
   struct timespec start, finish;
   long long int time_elapsed;
   clock_gettime(CLOCK_MONOTONIC, &start);
@@ -112,6 +122,16 @@ int main(int argc, char **argv) {
 
   printf("image dimensions %dx%d\n", width, height);
   detect_edges(image, results);
+  if(rank == 0){
+    MPI_Recv(buffer, width * height, MPI_BYTE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+    int n_pixels = width * height;
+    for(int i = status.MPI_SOURCE; i < n_pixels; i = i + size){
+      results[i] = buffer[i];
+    }
+  } else {
+    MPI_Send(results, width * height, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+  }
+  MPI_Finalize();
 
   clock_gettime(CLOCK_MONOTONIC, &finish);
   time_difference(&start, &finish, &time_elapsed);

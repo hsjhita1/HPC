@@ -4,8 +4,12 @@
 #include <crypt.h>
 #include <math.h>
 #include <time.h>
+#include <mpi.h>
 
 int n_passwords = 4;
+
+int size, rank;
+char buffer[4];
 
 char *encrypted_passwords[] = {
   "$6$KB$H8s0k9/1RQ783G9gF69Xkn.MI.Dq5Ox0va/dFlkknNjO7trgekVOjTv1BKCb.nm3vqxmtO2mOplhmFkwZXecz0",
@@ -63,15 +67,28 @@ int time_difference(struct timespec *start, struct timespec *finish, long long i
 }
 
 int main(int argc, char *argv[]){
+  MPI_Status status;
+  MPU_Init(NULL, NULL);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
   struct timespec start, finish;
   long long int time_elapsed;
   clock_gettime(CLOCK_MONOTONIC, &start);
 
   int i;
 
-  for(i=0;i<n_passwords;i<i++) {
+  for(i=rank;i<n_passwords;i = i+size) {
     crack(encrypted_passwords[i]);
   }
+
+  if(rank==0){
+    MPI_Recv(buffer, 4, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+  }
+  else {
+    MPI_Send();
+  }
+  MPI_Finalize();
 
   clock_gettime(CLOCK_MONOTONIC, &finish);
   time_difference(&start, &finish, &time_elapsed);
