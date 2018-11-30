@@ -22,7 +22,7 @@
       the pixel data type.
 
   To compile adapt the code below wo match your filenames:
-    cc -o ip_coursework_041 ip_coursework_041.c -lglut -lGL -lm
+    nvcc -o ip_coursework_041_cuda ip_coursework_041_cuda.cu -lglut -lGL -lm
 
   Dr Kevan Buckley, University of Wolverhampton, 2018
 ******************************************************************************/
@@ -31,7 +31,8 @@
 
 unsigned char image[], results[width * height];
 
-void detect_edges(unsigned char *in, unsigned char *out) {
+
+void detect_edges(void *args) {
   int i;
   int n_pixels = width * height;
 
@@ -104,6 +105,31 @@ static void key_pressed(unsigned char key, int x, int y) {
 }
 
 int main(int argc, char **argv) {
+  const int arraySize = 7200;
+  const int arrayBytes = arraySize*sizeOf(float);
+
+  float h_in[arraySize];
+  for(int i = 0; i < arraySize; i++){
+    h_in[i] = image[i];
+  }
+
+  float h_out[arraySize];
+  float *d_in, *d_out;
+
+  cudaMalloc((void**) &d_in, arrayBytes);
+  cudaMalloc((void**) &d_out, arrayBytes);
+
+  detect_edges<<<4, 1800>>>(d_out, d_in);
+  cudaThreadSynchronize();
+
+  cudaMemcpy(h_out, d_out, arrayBytes, cudaMemcpyDeviceToHost);
+  for(int i =0; i < arraySize; i++){
+    printf("%f\n", h_out[i]);
+  }
+
+  cudaFree(d_in);
+  cudaFree(d_out);
+
   struct timespec start, finish;
   long long int time_elapsed;
   clock_gettime(CLOCK_MONOTONIC, &start);
@@ -111,7 +137,7 @@ int main(int argc, char **argv) {
   signal(SIGINT, sigint_callback);
 
   printf("image dimensions %dx%d\n", width, height);
-  detect_edges(image, results);
+  //detect_edges(image, results);
 
   clock_gettime(CLOCK_MONOTONIC, &finish);
   time_difference(&start, &finish, &time_elapsed);
