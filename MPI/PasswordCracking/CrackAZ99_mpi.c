@@ -53,7 +53,7 @@ void crack(char *salt_and_encrypted){
 
   for(x=xStart; x<=xEnd; x++){
     for(y=yStart; y<=yEnd; y++){
-        for(z=0; z<=99; z++){
+        for(z=0; z<=9999; z++){
           sprintf(plain, "%c%c%02d", x, y,z);
           enc = (char *) crypt(plain, salt);
           count++;
