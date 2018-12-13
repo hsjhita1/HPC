@@ -36,8 +36,8 @@ void crack(char *salt_and_encrypted){
   char xStart, yStart, xEnd, yEnd;
 
   if (rank == 1) {
-	  xStart = 'A'; 
-	  yStart = 'A'; 
+	  xStart = 'A';
+	  yStart = 'A';
 	  xEnd = 'M';
 	  yEnd = 'Z';
   }
@@ -53,7 +53,7 @@ void crack(char *salt_and_encrypted){
 
   for(x=xStart; x<=xEnd; x++){
     for(y=yStart; y<=yEnd; y++){
-        for(z=0; z<=99; z++){
+        for(z=0; z<=9999; z++){
           sprintf(plain, "%c%c%02d", x, y,z);
           enc = (char *) crypt(plain, salt);
           count++;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]){
   struct timespec start, finish;
   long long int time_elapsed;
   clock_gettime(CLOCK_MONOTONIC, &start);
-  
+
   int i;
 
   if (rank == 0) {

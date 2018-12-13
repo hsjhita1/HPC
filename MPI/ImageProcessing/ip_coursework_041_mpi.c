@@ -24,6 +24,7 @@
 
   To compile adapt the code below wo match your filenames:
     mpicc ip_coursework_041_mpi.c -o ip_coursework_041_mpi -lglut -lGL -lm
+	mpiexec -n 2 ./ip_coursework_041_mpi
 
   Dr Kevan Buckley, University of Wolverhampton, 2018
 ******************************************************************************/
