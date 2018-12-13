@@ -6,6 +6,9 @@
 #include <time.h>
 #include <mpi.h>
 
+//Compile with mpicc CrackAZ99_mpi.c -o CrackAZ99_mpi -lcrypt
+//Run with mpiexec ./CrackAZ99_mpi > CrackAZ99MpiResults.txt
+
 int n_passwords = 4;
 
 int size, rank;
@@ -30,15 +33,28 @@ void crack(char *salt_and_encrypted){
   char *enc;
   int count = 0;
 
-  int third_initial; // new loop counter for the third initial
+  char xStart, yStart, xEnd, yEnd;
+
+  if (rank == 1) {
+	  xStart = 'A'; 
+	  yStart = 'A'; 
+	  xEnd = 'M';
+	  yEnd = 'Z';
+  }
+
+  if (rank == 2) {
+	  xStart = 'N';
+	  yStart = 'A';
+	  xEnd = 'Z';
+	  yEnd = 'Z';
+  }
 
   substr(salt, salt_and_encrypted, 0, 6);
 
-  for(x='A'; x<='Z'; x++){
-    for(y='A'; y<='Z'; y++){
-      for(third_initial = 'A'; third_initial <= 'Z'; third_initial++){ // new for loop for the third initial
+  for(x=xStart; x<=xEnd; x++){
+    for(y=yStart; y<=yEnd; y++){
         for(z=0; z<=99; z++){
-          sprintf(plain, "%c%c%c%02d", x, y, third_initial, z);
+          sprintf(plain, "%c%c%02d", x, y,z);
           enc = (char *) crypt(plain, salt);
           count++;
           if(strcmp(salt_and_encrypted, enc) == 0){
@@ -47,7 +63,6 @@ void crack(char *salt_and_encrypted){
             printf(" %-8d%s %s\n", count, plain, enc);
           }
         }
-      }
     }
   }
   printf("%d solutions explored\n", count);
@@ -68,26 +83,25 @@ int time_difference(struct timespec *start, struct timespec *finish, long long i
 
 int main(int argc, char *argv[]){
   MPI_Status status;
-  MPU_Init(NULL, NULL);
+  MPI_Init(NULL, NULL);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   struct timespec start, finish;
   long long int time_elapsed;
   clock_gettime(CLOCK_MONOTONIC, &start);
-
+  
   int i;
 
-  for(i=rank;i<n_passwords;i = i+size) {
-    crack(encrypted_passwords[i]);
-  }
-
-  if(rank==0){
-    MPI_Recv(buffer, 4, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+  if (rank == 0) {
+	MPI_Finalize();
   }
   else {
-    MPI_Send();
+	  for (i = 0; i < n_passwords; i++) {
+		  crack(encrypted_passwords[i]);
+	  }
   }
+
   MPI_Finalize();
 
   clock_gettime(CLOCK_MONOTONIC, &finish);

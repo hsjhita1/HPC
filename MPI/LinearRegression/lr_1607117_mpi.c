@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <mpi.h>
 
 /******************************************************************************
  * This program takes an initial estimate of m and c and finds the associated 
@@ -10,10 +11,10 @@
  * a gradient search for a minimum in mc-space.
  * 
  * To compile:
- *   cc -o lr_coursework lr_coursework.c -lm
- * 
+ *   mpicc lr_1607117_mpi.c -o lr_1607117_mpi -lm
+ *
  * To run:
- *   ./lr_coursework
+ *  mpiexec -n 8 ./lr_1607117_mpi
  * 
  * Dr Kevan Buckley, University of Wolverhampton, 2018
  *****************************************************************************/
@@ -22,6 +23,10 @@ typedef struct point_t {
   double x;
   double y;
 } point_t;
+
+typedef struct mpidata {
+	double dm , dc;
+} mpidata;
 
 int n_data = 1000;
 point_t data[];
@@ -57,38 +62,67 @@ int main() {
   double best_error = 999999999;
   int best_error_i;
   int minimum_found = 0;
+  int rank, size;
+  double er;
   
   double om[] = {0,1,1, 1, 0,-1,-1,-1};
   double oc[] = {1,1,0,-1,-1,-1, 0, 1};
 
   be = rms_error(bm, bc);
+  mpidata dmdc;
+  MPI_Status status;
+
+  MPI_Init(NULL, NULL);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   while(!minimum_found) {
-    for(i=0;i<8;i++) {
-      dm[i] = bm + (om[i] * step);
-      dc[i] = bc + (oc[i] * step);    
-    }
-      
-    for(i=0;i<8;i++) {
-      e[i] = rms_error(dm[i], dc[i]);
-      if(e[i] < best_error) {
-        best_error = e[i];
-        best_error_i = i;
-      }
-    }
+	  if (rank == 0) {
+		  for (i = 0; i < 8; i++) {
+			  dm[i] = bm + (om[i] * step);
+			  dc[i] = bc + (oc[i] * step);
+		  }
+		  for (i = 1; i < 8; i++) {
+			  MPI_Send(&dmdc, 2, MPI_DOUBLE, i, 0, MPI_COMM_WORLD);
+		  }
+		  for (i = 1; i < 8; i++) {
+			  MPI_Recv(&e[i], 1, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &status);
+		  }
+		  e[i] = rms_error(dm[0], dc[0]);
+		  for (i = 0; i < 8; i++) {
+			  //	e[i] = rms_error(dm[i], dc[i]);
+			  if (e[i] < best_error) {
+				  best_error = e[i];
+				  best_error_i = i;
+			  }
+		  }
 
-    printf("best m,c is %lf,%lf with error %lf in direction %d\n", 
-      dm[best_error_i], dc[best_error_i], best_error, best_error_i);
-    if(best_error < be) {
-      be = best_error;
-      bm = dm[best_error_i];
-      bc = dc[best_error_i];
-    } else {
-      minimum_found = 1;
-    }
+
+
+		  printf("best m,c is %lf,%lf with error %lf in direction %d\n",
+			  dm[best_error_i], dc[best_error_i], best_error, best_error_i);
+		  if (best_error < be) {
+			  be = best_error;
+			  bm = dm[best_error_i];
+			  bc = dc[best_error_i];
+		  }
+		  else {
+			  minimum_found = 1;
+		  }
+		  for (i = 1; i < 8; i++) {
+			  MPI_Send(&minimum_found, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+		  }
+	  } 
+	  else {
+			MPI_Recv(&dmdc, 2, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &status);
+			er = rms_error(dmdc.dm, dmdc.dc);
+			MPI_Send(&er, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+			MPI_Recv(&minimum_found, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+
+	  }
   }
   printf("minimum m,c is %lf,%lf with error %lf\n", bm, bc, be);
-
+  MPI_Finalize();
   return 0;
 }
 
