@@ -23,6 +23,7 @@
 
   To compile adapt the code below wo match your filenames:
     cc -o ip_coursework_041 ip_coursework_041.c -lglut -lGL -lm
+	
 
   Dr Kevan Buckley, University of Wolverhampton, 2018
 ******************************************************************************/

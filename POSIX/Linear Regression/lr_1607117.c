@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 
 /******************************************************************************
  * This program takes an initial estimate of m and c and finds the associated 
@@ -10,7 +11,7 @@
  * a gradient search for a minimum in mc-space.
  * 
  * To compile:
- *   cc -o lr_coursework lr_coursework.c -lm
+ *   cc -o lr_1607117 lr_1607117.c -lm
  * 
  * To run:
  *   ./lr_coursework
@@ -45,7 +46,23 @@ double rms_error(double m, double c) {
   return sqrt(mean);
 }
 
+int time_difference(struct timespec *start, struct timespec *finish, long long int *difference) {
+	long long int ds = finish->tv_sec - start->tv_sec;
+	long long int dn = finish->tv_nsec - start->tv_nsec;
+	if (dn < 0) {
+		ds--;
+		dn += 1000000000;
+	}
+	*difference = ds * 1000000000 + dn;
+	return !(*difference > 0);
+}
+
+
 int main() {
+	struct timespec start, finish;
+	long long int time_elapsed;
+	clock_gettime(CLOCK_MONOTONIC, &start);
+
   int i;
   double bm = 1.3;
   double bc = 10;
@@ -77,8 +94,8 @@ int main() {
       }
     }
 
-    printf("best m,c is %lf,%lf with error %lf in direction %d\n", 
-      dm[best_error_i], dc[best_error_i], best_error, best_error_i);
+    //printf("best m,c is %lf,%lf with error %lf in direction %d\n", 
+      dm[best_error_i], dc[best_error_i], best_error, best_error_i;
     if(best_error < be) {
       be = best_error;
       bm = dm[best_error_i];
@@ -87,8 +104,11 @@ int main() {
       minimum_found = 1;
     }
   }
-  printf("minimum m,c is %lf,%lf with error %lf\n", bm, bc, be);
+  //printf("minimum m,c is %lf,%lf with error %lf\n", bm, bc, be);
 
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  time_difference(&start, &finish, &time_elapsed);
+  printf("Time elapsed was %lldns or %0.9lfs\n", time_elapsed, (time_elapsed / 1.0e9));
   return 0;
 }
 
