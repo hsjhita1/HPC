@@ -57,12 +57,6 @@ int time_difference(struct timespec *start, struct timespec *finish, long long i
 	return !(*difference > 0);
 }
 
-void printData() {
-	for (int i = 0; i < n_data; i++) {
-		printf("%0.2lf, %0.2lf\n", data[i].x, data[i].y);
-	}
-}
-
 
 int main() {
 	struct timespec start, finish;
@@ -100,8 +94,8 @@ int main() {
       }
     }
 
-    //printf("best m,c is %lf,%lf with error %lf in direction %d\n", 
-     // dm[best_error_i], dc[best_error_i], best_error, best_error_i);
+    printf("best m,c is %lf,%lf with error %lf in direction %d\n", 
+      dm[best_error_i], dc[best_error_i], best_error, best_error_i);
     if(best_error < be) {
       be = best_error;
       bm = dm[best_error_i];
@@ -110,8 +104,8 @@ int main() {
       minimum_found = 1;
     }
   }
-  //printf("minimum m,c is %lf,%lf with error %lf\n", bm, bc, be);
-  printData();
+  printf("minimum m,c is %lf,%lf with error %lf\n", bm, bc, be);
+
   clock_gettime(CLOCK_MONOTONIC, &finish);
   time_difference(&start, &finish, &time_elapsed);
   printf("Time elapsed was %lldns or %0.9lfs\n", time_elapsed, (time_elapsed / 1.0e9));
