@@ -1,21 +1,22 @@
 #include <stdio.h>
 #include <math.h>
 #include <mpi.h>
+#include <time.h>
 
 /******************************************************************************
- * This program takes an initial estimate of m and c and finds the associated 
- * rms error. It is then as a base to generate and evaluate 8 new estimates, 
- * which are steps in different directions in m-c space. The best estimate is 
- * then used as the base for another iteration of "generate and evaluate". This 
+ * This program takes an initial estimate of m and c and finds the associated
+ * rms error. It is then as a base to generate and evaluate 8 new estimates,
+ * which are steps in different directions in m-c space. The best estimate is
+ * then used as the base for another iteration of "generate and evaluate". This
  * continues until none of the new estimates are better than the base. This is
  * a gradient search for a minimum in mc-space.
- * 
+ *
  * To compile:
  *   mpicc lr_1607117_mpi.c -o lr_1607117_mpi -lm
  *
  * To run:
  *  mpiexec -n 8 ./lr_1607117_mpi
- * 
+ *
  * Dr Kevan Buckley, University of Wolverhampton, 2018
  *****************************************************************************/
 
@@ -36,21 +37,43 @@ double residual_error(double x, double y, double m, double c) {
   return e * e;
 }
 
+
 double rms_error(double m, double c) {
   int i;
   double mean;
   double error_sum = 0;
-  
+
   for(i=0; i<n_data; i++) {
-    error_sum += residual_error(data[i].x, data[i].y, m, c);  
+    error_sum += residual_error(data[i].x, data[i].y, m, c);
   }
-  
+
   mean = error_sum / n_data;
-  
+
   return sqrt(mean);
 }
 
+int time_difference(struct timespec *start, struct timespec *finish, long long int *difference) {
+	long long int ds = finish->tv_sec - start->tv_sec;
+	long long int dn = finish->tv_nsec - start->tv_nsec;
+	if (dn < 0) {
+		ds--;
+		dn += 1000000000;
+	}
+	*difference = ds * 1000000000 + dn;
+	return !(*difference > 0);
+}
+
+void printData() {
+  for(int i = 0; i < n_data; i++){
+    printf("%0.2lf, %0.2lf\n", data[i].x, data[i].y);
+  }
+}
+
 int main() {
+  struct timespec start, finish;
+  long long int time_elasped;
+  clock_gettime(CLOCK_MONOTONIC, &start);
+
   int i;
   double bm = 1.3;
   double bc = 10;
@@ -64,17 +87,17 @@ int main() {
   int minimum_found = 0;
   int rank, size;
   double er;
-  
+
   double om[] = {0,1,1, 1, 0,-1,-1,-1};
   double oc[] = {1,1,0,-1,-1,-1, 0, 1};
 
-  be = rms_error(bm, bc);
+
   mpidata dmdc;
   MPI_Status status;
-
-  MPI_Init(NULL, NULL);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Init(NULL, NULL);
+  be = rms_error(bm, bc);
 
   while(!minimum_found) {
 	  if (rank == 0) {
@@ -88,14 +111,15 @@ int main() {
 		  for (i = 1; i < 8; i++) {
 			  MPI_Recv(&e[i], 1, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &status);
 		  }
-		  e[i] = rms_error(dm[0], dc[0]);
-		  for (i = 0; i < 8; i++) {
-			  //	e[i] = rms_error(dm[i], dc[i]);
+    }
+		  //e[i] = rms_error(dm[0], dc[0]);
+    for (i = 0; i < 8; i++) {
+        e[i] = rms_error(dm[i], dc[i]);
 			  if (e[i] < best_error) {
-				  best_error = e[i];
-				  best_error_i = i;
+				    best_error = e[i];
+				    best_error_i = i;
 			  }
-		  }
+
 
 
 
@@ -112,7 +136,7 @@ int main() {
 		  for (i = 1; i < 8; i++) {
 			  MPI_Send(&minimum_found, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
 		  }
-	  } 
+	  }
 	  else {
 			MPI_Recv(&dmdc, 2, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &status);
 			er = rms_error(dmdc.dm, dmdc.dc);
@@ -121,7 +145,11 @@ int main() {
 
 	  }
   }
-  printf("minimum m,c is %lf,%lf with error %lf\n", bm, bc, be);
+  //printf("minimum m,c is %lf,%lf with error %lf\n", bm, bc, be);
+  printData();
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  time_difference(&start, &finish, &time_elasped);
+  printf("TIme elapsed was %lldns or %0.9lfs\n", time_elasped, (time_elasped/1.0e9));
   MPI_Finalize();
   return 0;
 }

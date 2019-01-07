@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
+#include <pthread.h>
 
 /******************************************************************************
  * This program takes an initial estimate of m and c and finds the associated 
@@ -11,7 +12,7 @@
  * a gradient search for a minimum in mc-space.
  * 
  * To compile:
- *   cc -o lr_1607117 lr_1607117.c -lm
+ *   cc -o lr_1607117_multi lr_1607117_multi.c -lm -pthread
  * 
  * To run:
  *   ./lr_coursework
@@ -23,6 +24,10 @@ typedef struct point_t {
   double x;
   double y;
 } point_t;
+
+struct threadArgs {
+	int start, stride;
+};
 
 int n_data = 1000;
 point_t data[];
@@ -77,6 +82,9 @@ int main() {
   
   double om[] = {0,1,1, 1, 0,-1,-1,-1};
   double oc[] = {1,1,0,-1,-1,-1, 0, 1};
+
+
+
 
   be = rms_error(bm, bc);
 
