@@ -488,7 +488,7 @@ int main(int argc, char **argv) {
   cudaMalloc((void**) &d_in, arrayBytes);
   cudaMalloc((void**) &d_out, arrayBytes);
 
-  detect_edges <<<8, 612>>>(d_out, d_in);
+  detect_edges <<<8, 7200>>>(d_out, d_in);
   cudaThreadSynchronize();
   cudaMemcpy(h_in, d_in, arrayBytes, cudaMemcpyDeviceToHost);
 

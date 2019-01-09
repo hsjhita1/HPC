@@ -19,7 +19,7 @@
  *
  * Dr Kevan Buckley, University of Wolverhampton, 2018
  *****************************************************************************/
-
+int size ,rank;
 typedef struct point_t {
   double x;
   double y;
@@ -71,8 +71,8 @@ void printData() {
 
 int main() {
   struct timespec start, finish;
-  long long int time_elasped;
-  clock_gettime(CLOCK_MONOTONIC, &start);
+	long long int time_elapsed;
+	clock_gettime(CLOCK_MONOTONIC, &start);
 
   int i;
   double bm = 1.3;
@@ -85,74 +85,71 @@ int main() {
   double best_error = 999999999;
   int best_error_i;
   int minimum_found = 0;
-  int rank, size;
   double er;
 
   double om[] = {0,1,1, 1, 0,-1,-1,-1};
   double oc[] = {1,1,0,-1,-1,-1, 0, 1};
 
-
   mpidata dmdc;
-  MPI_Status status;
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Init(NULL, NULL);
-  be = rms_error(bm, bc);
+	MPI_Status status;
+	MPI_Init(NULL, NULL);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  while(!minimum_found) {
-	  if (rank == 0) {
-		  for (i = 0; i < 8; i++) {
-			  dm[i] = bm + (om[i] * step);
-			  dc[i] = bc + (oc[i] * step);
-		  }
-		  for (i = 1; i < 8; i++) {
-			  MPI_Send(&dmdc, 2, MPI_DOUBLE, i, 0, MPI_COMM_WORLD);
-		  }
-		  for (i = 1; i < 8; i++) {
-			  MPI_Recv(&e[i], 1, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &status);
-		  }
-    }
-		  //e[i] = rms_error(dm[0], dc[0]);
-    for (i = 0; i < 8; i++) {
-        e[i] = rms_error(dm[i], dc[i]);
-			  if (e[i] < best_error) {
-				    best_error = e[i];
-				    best_error_i = i;
-			  }
-
-
-
-
-		  printf("best m,c is %lf,%lf with error %lf in direction %d\n",
-			  dm[best_error_i], dc[best_error_i], best_error, best_error_i);
-		  if (best_error < be) {
-			  be = best_error;
-			  bm = dm[best_error_i];
-			  bc = dc[best_error_i];
-		  }
-		  else {
-			  minimum_found = 1;
-		  }
-		  for (i = 1; i < 8; i++) {
-			  MPI_Send(&minimum_found, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-		  }
-	  }
-	  else {
-			MPI_Recv(&dmdc, 2, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &status);
-			er = rms_error(dmdc.dm, dmdc.dc);
-			MPI_Send(&er, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
-			MPI_Recv(&minimum_found, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-
-	  }
-  }
+	be = rms_error(bm, bc);
+	while(!minimum_found) {
+		if (rank == 0) {
+			for(i = 0; i < 8; i++) {
+				dm[i] = bm + (om[i] * step);
+				dc[i] = bc + (oc[i] * step);
+			}
+	  		for(i = 1; i < 8; i++) {
+	        printf("Sending i=%d\n", i);
+			    dmdc.dm = dm[i];
+		      dmdc.dc = dc[i];
+		  		MPI_Send(&dmdc, 2, MPI_DOUBLE, i, 0, MPI_COMM_WORLD);
+ 			}
+			for(i = 1; i < 8; i++) {
+		  		printf("recieving i=%d\n",i);
+		  		MPI_Recv(&e[i], 1, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &status);
+		 	}
+		 	e[0] = rms_error(dm[0], dc[0]);
+		    	for(i = 0; i < 8; i++) {
+		      		e[i] = rms_error(dm[i], dc[i]);
+		      		if(e[i] < best_error) {
+			          best_error = e[i];
+			          best_error_i = i;
+		      		}
+		    	}
+		    	printf("best m,c is %lf,%lf with error %lf in direction %d\n", dm[best_error_i], dc[best_error_i], best_error, best_error_i);
+		    	if(best_error < be) {
+		      		be = best_error;
+		      		bm = dm[best_error_i];
+		      		bc = dc[best_error_i];
+		    	} else {
+		      		minimum_found = 1;
+		    	}
+		    	for(i = 1; i < 8; i++) {
+		       		MPI_Send(&minimum_found, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+		    	}
+		} else {
+		       MPI_Recv(&dmdc, 2 , MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
+		       double er = rms_error(dmdc.dm, dmdc.dc);
+		       MPI_Send(&er, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+		       MPI_Recv(&minimum_found, 1 , MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+  		}
+ 	}
   //printf("minimum m,c is %lf,%lf with error %lf\n", bm, bc, be);
   printData();
-  clock_gettime(CLOCK_MONOTONIC, &finish);
-  time_difference(&start, &finish, &time_elasped);
-  printf("TIme elapsed was %lldns or %0.9lfs\n", time_elasped, (time_elasped/1.0e9));
   MPI_Finalize();
-  return 0;
+
+	clock_gettime(CLOCK_MONOTONIC, &finish);
+	time_difference(&start, &finish, &time_elapsed);
+	printf("Time elapsed was, %lldns or %0.9lf,s\n", time_elapsed, (time_elapsed/1.0e9));
+
+	return 0;
 }
+
 
 point_t data[] = {
   {72.33,116.23},{65.60,125.82},{82.57,146.00},{80.88,137.75},
