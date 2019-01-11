@@ -1,4 +1,12 @@
+Redirecting to URL 'https://www.github.com/hsjhita1/HPC':
 Redirecting to URL 'https://github.com/hsjhita1/HPC':
+------------------------------------------------------------------------
+r27 | hsjhita1 | 2019-01-11 12:25:50 +0000 (Fri, 11 Jan 2019) | 4 lines
+
+Update of CUDA Image
+
+Time was not correctly worked out so program was modified to fix this issue. Journal and time document updated to include modifed code and updated results.
+
 ------------------------------------------------------------------------
 r26 | hsjhita1 | 2019-01-09 16:03:51 +0000 (Wed, 09 Jan 2019) | 4 lines
 
