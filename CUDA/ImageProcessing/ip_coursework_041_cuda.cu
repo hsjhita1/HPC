@@ -487,19 +487,16 @@ int main(int argc, char **argv) {
 
   cudaMalloc((void**) &d_in, arrayBytes);
   cudaMalloc((void**) &d_out, arrayBytes);
+  struct timespec start, finish;
+  long long int time_elapsed;
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   detect_edges <<<8, 7200>>>(d_out, d_in);
   cudaThreadSynchronize();
   cudaMemcpy(h_in, d_in, arrayBytes, cudaMemcpyDeviceToHost);
-
  	cudaFree(d_in);
   cudaFree(d_out);
-
-	struct timespec start, finish;
-  long long int time_elapsed;
-
   signal(SIGINT, sigint_callback);
-	clock_gettime(CLOCK_MONOTONIC, &start);
   printf("image dimensions %dx%d\n", width, height);
 	//detect_edges(image, results);
 

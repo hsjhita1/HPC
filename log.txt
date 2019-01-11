@@ -1,0 +1,170 @@
+Redirecting to URL 'https://github.com/hsjhita1/HPC':
+------------------------------------------------------------------------
+r26 | hsjhita1 | 2019-01-09 16:03:51 +0000 (Wed, 09 Jan 2019) | 4 lines
+
+Working MPI Linear Regression
+
+MPI Linear Regression now working and updated the journal and times document
+
+------------------------------------------------------------------------
+r25 | hsjhita1 | 2019-01-07 10:43:52 +0000 (Mon, 07 Jan 2019) | 2 lines
+
+Update on some files
+
+------------------------------------------------------------------------
+r24 | hsjhita1 | 2018-12-17 17:00:36 +0000 (Mon, 17 Dec 2018) | 4 lines
+
+Work on CUDA and Posix
+
+Completed work on CUDA Image processing and almost finished work on POSIX linear regression. Updated the time spreadsheets to include the new results.
+
+------------------------------------------------------------------------
+r23 | hsjhita1 | 2018-12-14 11:29:29 +0000 (Fri, 14 Dec 2018) | 2 lines
+
+Added time for linear regression
+
+------------------------------------------------------------------------
+r22 | hsjhita1 | 2018-12-13 12:57:56 +0000 (Thu, 13 Dec 2018) | 2 lines
+
+Create 6CS005 Learning Journal Semester 1 2018-19.docx
+
+------------------------------------------------------------------------
+r21 | hsjhita1 | 2018-12-13 12:50:00 +0000 (Thu, 13 Dec 2018) | 2 lines
+
+Merge branch 'master' of https://github.com/hsjhita1/HPC
+
+------------------------------------------------------------------------
+r20 | hsjhita1 | 2018-11-30 13:38:35 +0000 (Fri, 30 Nov 2018) | 4 lines
+
+Upload of mpi image
+
+Added new document which contains time for image, will do for the others as well
+
+------------------------------------------------------------------------
+r19 | hsjhita1 | 2018-11-30 10:49:18 +0000 (Fri, 30 Nov 2018) | 2 lines
+
+Change to match spec
+
+------------------------------------------------------------------------
+r18 | hsjhita1 | 2018-11-30 10:37:16 +0000 (Fri, 30 Nov 2018) | 4 lines
+
+New work
+
+Upload of new work
+
+------------------------------------------------------------------------
+r17 | hsjhita1 | 2018-12-13 12:28:00 +0000 (Thu, 13 Dec 2018) | 2 lines
+
+Upload of MPI documents prior to run
+
+------------------------------------------------------------------------
+r16 | harpreet | 2018-11-22 12:59:28 +0000 (Thu, 22 Nov 2018) | 4 lines
+
+MPI
+
+Commit of MPI
+
+------------------------------------------------------------------------
+r15 | harpreet | 2018-11-16 16:29:26 +0000 (Fri, 16 Nov 2018) | 4 lines
+
+Update for all files
+
+Added all the files for the required sections
+
+------------------------------------------------------------------------
+r14 | harpreet | 2018-11-16 16:02:55 +0000 (Fri, 16 Nov 2018) | 4 lines
+
+Image processing for POSIX thread
+
+Image processing with posix threads done
+
+------------------------------------------------------------------------
+r13 | harpreet | 2018-11-02 10:50:07 +0000 (Fri, 02 Nov 2018) | 2 lines
+
+Update CUDA/PasswordCracking/CrackAZ99POSIX.c
+
+------------------------------------------------------------------------
+r12 | harpreet | 2018-11-02 10:49:24 +0000 (Fri, 02 Nov 2018) | 4 lines
+
+Updated File System
+
+Updated file system
+
+------------------------------------------------------------------------
+r11 | harpreet | 2018-11-01 16:49:04 +0000 (Thu, 01 Nov 2018) | 4 lines
+
+Updated results and journal
+
+Updated the results as the new system is the Google Cloud so some of the results have been rerun and calculations in the learning journal have been updated
+
+------------------------------------------------------------------------
+r10 | harpreet | 2018-11-01 12:50:51 +0000 (Thu, 01 Nov 2018) | 4 lines
+
+Upload of multithreading results
+
+Upload of the multithreaded 3 initial 2 numbers program and a fix on a variable name that was not changed
+
+------------------------------------------------------------------------
+r9 | harpreet | 2018-11-01 09:08:40 +0000 (Thu, 01 Nov 2018) | 4 lines
+
+Changed variable names
+
+Changed some of the variable names to make the specification
+
+------------------------------------------------------------------------
+r8 | harpreet | 2018-10-31 14:36:36 +0000 (Wed, 31 Oct 2018) | 4 lines
+
+Fixed code
+
+Fixed issue in code where all possible solutions were not explored
+
+------------------------------------------------------------------------
+r7 | harpreet | 2018-10-30 17:58:50 +0000 (Tue, 30 Oct 2018) | 4 lines
+
+1.2 Tasks
+
+Start of 1.2 Image processing, initial code ran and picture has been manually saved.
+
+------------------------------------------------------------------------
+r6 | harpreet | 2018-10-30 15:50:56 +0000 (Tue, 30 Oct 2018) | 6 lines
+
+Working Programs for all 3 Password Cracking Section
+
+2 Letters 2 Numbers working, 3 Letters 2 Numbers working, 3 Letters 2 numbers WITH multithreading working.
+
+Results not on the journal yet as I am going to change the machine I will use so I can get better performance out of the programs compared to my laptop.
+
+------------------------------------------------------------------------
+r5 | harpreet | 2018-10-30 14:30:28 +0000 (Tue, 30 Oct 2018) | 4 lines
+
+CrackABC99
+
+Modified code to make the program run with 3 initials Upload is before the results due to the duration it would take on the machine and will be commited later on.
+
+------------------------------------------------------------------------
+r4 | harpreet | 2018-10-29 16:59:21 +0000 (Mon, 29 Oct 2018) | 4 lines
+
+Upload
+
+Upload of the results containing the 10x run with a bit of the journal filled in
+
+------------------------------------------------------------------------
+r3 | harpreet | 2018-10-29 12:43:25 +0000 (Mon, 29 Oct 2018) | 4 lines
+
+Update PasswordCracking/mr.py
+
+Program to make it run 10 times
+
+------------------------------------------------------------------------
+r2 | harpreet | 2018-10-29 11:32:27 +0000 (Mon, 29 Oct 2018) | 4 lines
+
+Update PasswordCracking/CrackAZ99-With-Data.c
+
+Code changed to show the time at the end of the program
+
+------------------------------------------------------------------------
+r1 | harpreet | 2018-10-29 11:05:16 +0000 (Mon, 29 Oct 2018) | 2 lines
+
+Initial commit
+
+------------------------------------------------------------------------
